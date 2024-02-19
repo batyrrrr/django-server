@@ -1,4 +1,4 @@
 from . logout import LogoutViewSet
-from . login import LoginSerializer
+from . login import LoginViewSet
 from . refresh import RefreshViewSet
-from . register import RegisterSerializer
+from . register import RegisterViewSet
