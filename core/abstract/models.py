@@ -11,7 +11,7 @@ class AbstractManager(models.Manager):
         try:
             return self.get(public_id=public_id)
         except (ObjectDoesNotExist, ValueError, TypeError):
-            return Http404
+            raise Http404
 
 
 class AbstractModel(models.Model):
