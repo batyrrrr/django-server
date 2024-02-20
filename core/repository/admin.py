@@ -1,4 +1,4 @@
-from . models import Repository
+from .models import Repository
 from django.contrib import admin
 
 

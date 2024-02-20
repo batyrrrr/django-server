@@ -16,22 +16,47 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Repository',
+            name="Repository",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('public_id', models.UUIDField(db_index=True, default=uuid.uuid4, editable=False, unique=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=255)),
-                ('edited', models.BooleanField(default=False)),
-                ('description', models.TextField(max_length=500)),
-                ('file', models.FileField(blank=True, max_length=500, null=True, upload_to='repositories/')),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='user_repository', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "public_id",
+                    models.UUIDField(
+                        db_index=True, default=uuid.uuid4, editable=False, unique=True
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=255)),
+                ("edited", models.BooleanField(default=False)),
+                ("description", models.TextField(max_length=500)),
+                (
+                    "file",
+                    models.FileField(
+                        blank=True, max_length=500, null=True, upload_to="repositories/"
+                    ),
+                ),
+                (
+                    "author",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.RESTRICT,
+                        related_name="user_repository",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Repository',
-                'verbose_name_plural': 'Repositories',
-                'ordering': ['-updated_at'],
+                "verbose_name": "Repository",
+                "verbose_name_plural": "Repositories",
+                "ordering": ["-updated_at"],
             },
         ),
     ]

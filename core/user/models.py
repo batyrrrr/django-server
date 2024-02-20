@@ -1,6 +1,10 @@
 from django.db import models
 from core.abstract.models import AbstractModel, AbstractManager
-from django.contrib.auth.models import BaseUserManager, PermissionsMixin, AbstractBaseUser
+from django.contrib.auth.models import (
+    BaseUserManager,
+    PermissionsMixin,
+    AbstractBaseUser,
+)
 
 
 class UserManager(BaseUserManager, AbstractManager):
@@ -14,7 +18,9 @@ class UserManager(BaseUserManager, AbstractManager):
             raise TypeError("User must have a password.")
 
         # Normalizing email by lowercase
-        user = self.model(username=username, email=self.normalize_email(email), **kwargs)
+        user = self.model(
+            username=username, email=self.normalize_email(email), **kwargs
+        )
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -36,11 +42,7 @@ class UserManager(BaseUserManager, AbstractManager):
 
 
 class User(AbstractModel, AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(
-        db_index=True,
-        max_length=255,
-        unique=True
-    )
+    username = models.CharField(db_index=True, max_length=255, unique=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(db_index=True, unique=True)

@@ -18,7 +18,4 @@ class LoginViewSet(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
         except TokenError as error:
             raise InvalidToken(error.args[0])
-        return Response(
-            serializer.validated_data,
-            status=status.HTTP_200_OK
-        )
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)

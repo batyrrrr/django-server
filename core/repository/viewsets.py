@@ -18,9 +18,9 @@ class RepositoryViewSet(AbstractViewSet):
         return Repository.objects.prefetch_related("author").all()
 
     def get_object(self):
-        """ Fetch the repository detail.
-            In Django, when you define a URL pattern with a path converter,
-            such as <int:pk> or <slug:pk>, the captured value is stored in the kwargs attribute of the view class.
+        """Fetch the repository detail.
+        In Django, when you define a URL pattern with a path converter,
+        such as <int:pk> or <slug:pk>, the captured value is stored in the kwargs attribute of the view class.
         """
         obj = Repository.objects.get_object_by_public_id(self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
@@ -32,20 +32,14 @@ class RepositoryViewSet(AbstractViewSet):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
-            return Response(
-                "Repository Posted!",
-                status=status.HTTP_201_CREATED
-            )
+            return Response("Repository Posted!", status=status.HTTP_201_CREATED)
         except Exception as error:
-            return Response(
-                f"{error}",
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(f"{error}", status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         """
-            Rewriting the update function to ensure the edited field is set to True when
-            modifying the recipe and only allow the author of the recipe or superuser only.
+        Rewriting the update function to ensure the edited field is set to True when
+        modifying the recipe and only allow the author of the recipe or superuser only.
         """
         instance = self.get_object()
         if not instance.edited:

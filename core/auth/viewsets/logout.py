@@ -10,7 +10,7 @@ from rest_framework import (
 
 class LogoutViewSet(viewsets.ViewSet):
     http_method_names = ["post"]
-    permission_classes =[permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         """Generated token will automatically be available in blacklisted."""

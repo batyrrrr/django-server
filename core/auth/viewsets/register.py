@@ -12,8 +12,8 @@ class RegisterViewSet(viewsets.ViewSet):
 
     def create(self, request, *args, **kwargs):
         """
-            The only required fields are the following, username, email and password the rest are optional.
-            First it check the request data if valid by serializing then save.
+        The only required fields are the following, username, email and password the rest are optional.
+        First it check the request data if valid by serializing then save.
         """
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):

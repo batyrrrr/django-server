@@ -1,4 +1,4 @@
-from . models import User
+from .models import User
 from django.contrib import admin
 
 
@@ -16,7 +16,4 @@ class CustomUserAdmin(admin.ModelAdmin):
         "is_active",
         "is_superuser",
     ]
-    list_filter = [
-        "is_active",
-        "is_superuser"
-    ]
+    list_filter = ["is_active", "is_superuser"]

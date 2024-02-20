@@ -29,10 +29,14 @@ class TestRepository(APITestCase):
 
         # Repository List
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data["results"]), len(Repository.objects.values_list()))
+        self.assertEqual(
+            len(response.data["results"]), len(Repository.objects.values_list())
+        )
 
         # Repository Detail
-        url_detail = reverse("repositories-detail", kwargs={"pk": self.repository.public_id})
+        url_detail = reverse(
+            "repositories-detail", kwargs={"pk": self.repository.public_id}
+        )
         response_detail = self.client.get(url_detail)
 
         self.assertEqual(response_detail.status_code, 200)
@@ -51,27 +55,47 @@ class TestRepositoryViewSets(APITestCase):
 
     def test_create_repositories_authorize_user(self):
         self.client.force_authenticate(user=self.user)
-        data = {"title": "Test title", "description": "Test Description", "author": self.user.public_id}
-        response = self.client.post(self.reverse_url("repositories-list"), data, format="json")
+        data = {
+            "title": "Test title",
+            "description": "Test Description",
+            "author": self.user.public_id,
+        }
+        response = self.client.post(
+            self.reverse_url("repositories-list"), data, format="json"
+        )
         self.assertEqual(response.status_code, 201)
 
     def test_create_repositories_authorize_user_raise_exception(self):
         self.client.force_authenticate(user=self.user)
         url = reverse("repositories-list")
-        data = {"title": "", "description": "Test Description", "author": self.user.public_id}
-        response = self.client.post(self.reverse_url("repositories-list"), data, format="json")
+        data = {
+            "title": "",
+            "description": "Test Description",
+            "author": self.user.public_id,
+        }
+        response = self.client.post(
+            self.reverse_url("repositories-list"), data, format="json"
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_update_repository_with_authenticated_user(self):
         self.client.force_authenticate(self.user)
         repository = RepositoryFactory(author=self.user)
-        obj_id = Repository.objects.get_object_by_public_id(public_id=repository.public_id)
-        updated_data = {"title": "Updated Title", "description": "Updated Description", "author": self.user.public_id}
+        obj_id = Repository.objects.get_object_by_public_id(
+            public_id=repository.public_id
+        )
+        updated_data = {
+            "title": "Updated Title",
+            "description": "Updated Description",
+            "author": self.user.public_id,
+        }
 
         # Before Updating
         self.assertFalse(repository.edited)
         response = self.client.patch(
-            self.reverse_url("repositories-detail", pk=obj_id.public_id), updated_data, format="json"
+            self.reverse_url("repositories-detail", pk=obj_id.public_id),
+            updated_data,
+            format="json",
         )
 
         # After Applying
@@ -100,8 +124,4 @@ class TestRepositoryViewSets(APITestCase):
 
         # UPDATE
 
-
         # DELETE
-
-
-
