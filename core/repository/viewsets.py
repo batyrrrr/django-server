@@ -3,13 +3,13 @@ from rest_framework import status
 from rest_framework.response import Response
 from .serializers import RepositorySerializer
 from core.abstract.viewsets import AbstractViewSet
-from core.auth.permissions import IsAuthenticatedOrAdmin
 from rest_framework.permissions import IsAuthenticated
+from core.auth.permissions import IsAuthorOrOwnerOrAdmin
 
 
 # Create your views here.
 class RepositoryViewSet(AbstractViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthorOrOwnerOrAdmin]
     serializer_class = RepositorySerializer
     http_method_names = ["get", "post", "patch", "delete"]
 
