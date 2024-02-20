@@ -93,7 +93,15 @@ class TestRepositoryViewSets(APITestCase):
         self.assertEqual(response.status_code, 201)
 
         # READ
+        repo = Repository.objects.first()
+        url_datail = self.reverse_url("repositories-detail", pk=repo.public_id)
+        response_detail = self.client.get(url_datail)
+        self.assertEqual(response_detail.status_code, 200)
 
+        # UPDATE
+
+
+        # DELETE
 
 
 
