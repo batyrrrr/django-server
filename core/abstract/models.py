@@ -16,6 +16,7 @@ class AbstractManager(models.Manager):
 
 class AbstractModel(models.Model):
     """db_index = True | for faster lookups"""
+
     public_id = models.UUIDField(
         db_index=True, unique=True, default=uuid.uuid4, editable=False
     )
@@ -25,5 +26,6 @@ class AbstractModel(models.Model):
     objects = AbstractManager()
 
     class Meta:
-        """Serve as a blueprint for other class model. """
+        """Serve as a blueprint for other class model."""
+
         abstract = True

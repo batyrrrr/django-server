@@ -1,10 +1,11 @@
-from . models import User
+from .models import User
 from core.abstract.serializers import AbstractSerializer
 
 
 class UserSerializer(AbstractSerializer):
     class Meta:
         """List of all fields that will be included in request or a response."""
+
         model = User
         fields = [
             "id",

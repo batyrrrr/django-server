@@ -23,7 +23,7 @@ from django.conf.urls.static import static
 API_PREFIX = "api/"
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     path(API_PREFIX, include("core.routers")),
 ]
 

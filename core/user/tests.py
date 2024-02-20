@@ -1,4 +1,4 @@
-from . models import User
+from .models import User
 from django.urls import reverse
 from core.factories.user_factory import UserFactory
 from rest_framework.test import APITestCase, APIClient
@@ -18,7 +18,7 @@ class TestUserModelAndManager(APITestCase):
         cls.superuser = User.objects.create_superuser(
             username="superuser",
             email="superuser@gmail.com",
-            password="superuserpassword"
+            password="superuserpassword",
         )
         cls.basic_user = UserFactory(email="testuser@test.com", username="test")
 

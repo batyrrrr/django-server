@@ -1,12 +1,12 @@
 from core.user.models import User
 from .serializers import UserSerializer
 from core.abstract.viewsets import AbstractViewSet
-from core.auth.permissions import IsAuthenticatedOrAdmin
+from core.auth.permissions import IsAuthorOrOwnerOrAdmin
 
 
 class UserViewSet(AbstractViewSet):
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticatedOrAdmin]
+    permission_classes = [IsAuthorOrOwnerOrAdmin]
     http_method_names = ["get", "patch", "delete"]
 
     def get_queryset(self):

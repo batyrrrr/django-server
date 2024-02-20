@@ -17,7 +17,4 @@ class RefreshViewSet(viewsets.ViewSet, TokenRefreshView):
             serializer.is_valid(raise_exception=True)
         except TokenError as error:
             return Response({"detail": error}, status=status.HTTP_401_UNAUTHORIZED)
-        return Response(
-            serializer.validated_data,
-            status=status.HTTP_201_CREATED
-        )
+        return Response(serializer.validated_data, status=status.HTTP_201_CREATED)

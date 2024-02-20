@@ -8,7 +8,7 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     username = factory.Faker("user_name")
     email = factory.Faker("email")
-    password = factory.PostGenerationMethodCall('set_password', 'testpassword')
+    password = factory.PostGenerationMethodCall("set_password", "testpassword")
 
     @classmethod
     def create_superuser(cls, **kwargs):
