@@ -6,9 +6,6 @@ class Repository(AbstractModel):
     title = models.CharField(max_length=255)
     edited = models.BooleanField(default=False)
     description = models.TextField(max_length=500)
-    file = models.FileField(
-        null=True, blank=True, upload_to="repositories/", max_length=500
-    )
     author = models.ForeignKey(
         to="core_user.User",
         on_delete=models.RESTRICT,

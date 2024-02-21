@@ -20,7 +20,6 @@ class RepositorySerializer(AbstractSerializer):
         model = Repository
         fields = [
             "id",
-            "file",
             "title",
             "edited",
             "author",

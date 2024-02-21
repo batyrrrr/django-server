@@ -8,7 +8,6 @@ class CustomRepositoryAdmin(admin.ModelAdmin):
     list_display = [
         "title",
         "author",
-        "file",
         "edited",
         "description",
     ]
