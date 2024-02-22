@@ -14,10 +14,8 @@ class LogoutViewSet(viewsets.ViewSet):
 
     def create(self, request, *args, **kwargs):
         """Generated token will automatically be available in blacklisted."""
-        try:
-            refresh = request.data.get("refresh_token")
+        refresh = request.data.get("refresh_token")
+        if refresh:
             token = RefreshToken(refresh)
             token.blacklist()
             return Response("Logout Successfully!", status=status.HTTP_200_OK)
-        except TokenError as error:
-            return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)

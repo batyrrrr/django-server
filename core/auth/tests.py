@@ -50,6 +50,20 @@ class TestAuthentication(APITestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_successful_logout_attempt(self):
+        _ = self.client.force_authenticate(self.user)
+        logout_url = reverse("auth-logout-list")
+        logout_response = self.client.post(logout_url)
+        self.assertEqual(logout_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(logout_response.data, "Logout Successfully!")
+
+    def test_unsuccessful_logout_attempt(self):
+        # _ = self.client.force_authenticate(self.user)
+        logout_url = reverse("auth-logout-list")
+        logout_response = self.client.post(logout_url)
+        self.assertEqual(logout_response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("detail", logout_response.data)
+
     def test_success_refresh_token(self):
         login_url = reverse("auth-login-list")
         data = {"email": self.user.email, "password": "12345678"}
