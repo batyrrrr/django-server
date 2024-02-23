@@ -9,7 +9,7 @@ class IsAuthorOrOwnerOrAdmin(BasePermission):
         if request.method in SAFE_METHODS:
             return bool(request.user and request.user.is_authenticated)
         return bool(
-            (obj.author == request.user and request.user.is_authenticated)
+            (obj.creator == request.user and request.user.is_authenticated)
             or request.user.is_superuser
         )
 

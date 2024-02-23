@@ -3,19 +3,19 @@ from rest_framework import status
 from rest_framework.response import Response
 from .serializers import RepositorySerializer
 from core.abstract.viewsets import AbstractViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from core.auth.permissions import IsAuthorOrOwnerOrAdmin
 
 
 # Create your views here.
 class RepositoryViewSet(AbstractViewSet):
-    permission_classes = [IsAuthorOrOwnerOrAdmin]
+    permission_classes = [AllowAny]
     serializer_class = RepositorySerializer
     http_method_names = ["get", "post", "patch", "delete"]
 
     def get_queryset(self):
         """fetch all repositories"""
-        return Repository.objects.prefetch_related("author").all()
+        return Repository.objects.prefetch_related("creator").all()
 
     def get_object(self):
         """Fetch the repository detail.

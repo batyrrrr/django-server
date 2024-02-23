@@ -1,23 +1,32 @@
-from .models import Repository
 from core.user.models import User
 from rest_framework import serializers
+from .models import Repository, Category
 from core.user.serializers import UserSerializer
 from rest_framework.exceptions import ValidationError
 from core.abstract.serializers import AbstractSerializer
 
 
+class CategorySerializer(AbstractSerializer):
+    class Meta:
+        model = Category
+        fields = ["name", "created_at", "updated_at"]
+
+
 class RepositorySerializer(AbstractSerializer):
-    author = serializers.SlugRelatedField(
+    creator = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field="public_id"
     )
 
     def to_representation(self, instance):
-        rep = super().to_representation(instance)
-        author = User.objects.get_object_by_public_id(public_id=rep["author"])
-        rep["author"] = UserSerializer(author).data
-        return rep
+        representation = super().to_representation(instance)
+        creator = User.objects.get_object_by_public_id(
+            public_id=representation["creator"]
+        )
+        representation["creator"] = UserSerializer(creator).data
+        representation["category"] = instance.category.name
+        return representation
 
-    def validate_author(self, value):
+    def validate_creator(self, value):
         if (
             self.context["request"].user.is_superuser
             or self.context["request"].user == value
@@ -32,6 +41,9 @@ class RepositorySerializer(AbstractSerializer):
             "title",
             "edited",
             "author",
+            "creator",
+            "category",
+            "is_public",
             "created_at",
             "updated_at",
             "description",

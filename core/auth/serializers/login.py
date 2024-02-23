@@ -1,3 +1,4 @@
+from core.user.serializers import UserSerializer
 from django.contrib.auth.models import update_last_login
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -8,6 +9,7 @@ class LoginSerializer(TokenObtainPairSerializer):
         """Validating the request data before obtaining the refresh and access token from the inherited class."""
         data = super().validate(attrs)
         refresh = self.get_token(self.user)
+        data["user"] = UserSerializer(self.user).data
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
 
