@@ -14,15 +14,12 @@ class IsAuthorOrOwnerOrAdmin(BasePermission):
         )
 
 
-# class IsAuthorOrOwnerOrAdmin(BasePermission):
-#     def has_permission(self, request, view):
-#         if request.method in SAFE_METHODS or request.method == "POST":
-#             return bool(request.user and request.user.is_authenticated)
-#         return False
+class IsSuperuser(BasePermission):
+    """Only Superuser can register a new user."""
 
-#     def has_object_permission(self, request, view, obj):
-#         if request.method in ["PATCH", "PUT", "DELETE"]:
-#             return (
-#                 bool(request.user and request.user.is_authenticated and (request.user == obj.author or request.user.is_superuser))
-#             )
-#         return False
+    message = "Only superusers are allowed to register new users."
+
+    def has_permission(self, request, view):
+        if request.method in ["POST"]:
+            return bool(request.user and request.user.is_superuser)
+        return False
