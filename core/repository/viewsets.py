@@ -1,15 +1,14 @@
 from .models import Repository
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from .serializers import RepositorySerializer
 from core.abstract.viewsets import AbstractViewSet
-from rest_framework.permissions import AllowAny
-from core.auth.permissions import IsAuthorOrOwnerOrAdmin
+from core.auth.permissions import IsSuperuserOrReadOnly
 
 
-# Create your views here.
 class RepositoryViewSet(AbstractViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [IsSuperuserOrReadOnly]
     serializer_class = RepositorySerializer
     http_method_names = ["get", "post", "patch", "delete"]
 
@@ -25,16 +24,6 @@ class RepositoryViewSet(AbstractViewSet):
         obj = Repository.objects.get_object_by_public_id(self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
-
-    def create(self, request, *args, **kwargs):
-        """Return created recipe instance."""
-        try:
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            return Response("Repository Posted!", status=status.HTTP_201_CREATED)
-        except Exception as error:
-            return Response(f"{error}", status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         """

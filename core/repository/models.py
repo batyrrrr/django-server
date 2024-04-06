@@ -1,4 +1,5 @@
 from django.db import models
+from core.user.models import User
 from core.abstract.models import AbstractModel
 
 
@@ -18,7 +19,7 @@ class Repository(AbstractModel):
     author = models.CharField(max_length=255)
     edited = models.BooleanField(default=False)
     is_public = models.BooleanField(default=False)
-    description = models.TextField(max_length=500)
+    description = models.TextField(max_length=1000)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -27,7 +28,7 @@ class Repository(AbstractModel):
         blank=True,
     )
     creator = models.ForeignKey(
-        to="core_user.User",
+        User,
         on_delete=models.RESTRICT,
         related_name="user_repository",
     )

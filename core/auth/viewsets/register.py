@@ -1,13 +1,13 @@
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from core.auth.permissions import IsSuperuser
 from core.auth.serializers.register import RegisterSerializer
 
 
 class RegisterViewSet(viewsets.ViewSet):
     http_method_names = ["post"]
-    permission_classes = [AllowAny]
+    permission_classes = [IsSuperuser]
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
@@ -18,4 +18,6 @@ class RegisterViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response("Registered Successfully", status=status.HTTP_201_CREATED)
+            return Response(
+                {"detail": "Registered Successfully"}, status=status.HTTP_201_CREATED
+            )

@@ -14,3 +14,7 @@ class TestAbstractManager(TestCase):
             User.objects.get_object_by_public_id(
                 public_id="00000000-0000-0000-0000-000000000001"
             )
+
+    def test_get_object_by_public_id(self):
+        user = User.objects.get_object_by_public_id(public_id=self.user.public_id)
+        self.assertEqual(user, self.user)
