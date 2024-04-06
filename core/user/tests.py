@@ -187,22 +187,172 @@ class TestUserViewSetEndpoint(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_update_user_password_using_superuser_account(self):
-        """Test updating user password using superuser account."""
+    def test_update_user_password_using_superuser_account_without_uppercase_number_and_special_char(
+        self,
+    ):
+        """Test updating user password using superuser account without uppercase, number, and special char."""
         self.client.force_authenticate(user=self.superuser)
         url = reverse(
             "auth-user-update-password", kwargs={"pk": self.basicuser1.public_id}
         )
         response = self.client.patch(url, {"password": "newpassword"})
 
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["password"][0],
+            "Password must contain at least one uppercase letter.",
+        )
+
+    def test_update_user_password_using_superuser_account_without_number_and_special_char(
+        self,
+    ):
+        """Test updating user password using superuser account without number and special char."""
+        self.client.force_authenticate(user=self.superuser)
+        url = reverse(
+            "auth-user-update-password", kwargs={"pk": self.basicuser1.public_id}
+        )
+        response = self.client.patch(url, {"password": "Newpassword"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["password"][0], "Password must contain at least one digit."
+        )
+
+    def test_update_user_password_using_superuser_account_without_special_char(self):
+        """Test updating user password using superuser account without special char."""
+        self.client.force_authenticate(user=self.superuser)
+        url = reverse(
+            "auth-user-update-password", kwargs={"pk": self.basicuser1.public_id}
+        )
+        response = self.client.patch(url, {"password": "Newpassword1"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["password"][0],
+            "Password must contain at least one special character (!@#$%^&_*()).",
+        )
+
+    def test_update_user_password_using_superuser_account_empty_password(self):
+        """Test updating user password using superuser account empty password."""
+        self.client.force_authenticate(user=self.superuser)
+        url = reverse(
+            "auth-user-update-password", kwargs={"pk": self.basicuser1.public_id}
+        )
+        response = self.client.patch(url, {"password": ""})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["password"][0], "This field may not be blank.")
+
+    def test_update_user_password_using_superuser_account_then_login(self):
+        """Test updating user password using superuser account."""
+        self.client.force_authenticate(user=self.superuser)
+        url = reverse(
+            "auth-user-update-password", kwargs={"pk": self.basicuser1.public_id}
+        )
+        response = self.client.patch(url, {"password": "Newpassword1!"})
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["detail"], "Password updated successfully.")
 
-    # def test_update_user_password_using_own_account(self):
-    #     """Test updating user password using own account."""
-    #     self.client.force_authenticate(user=self.basicuser1)
-    #     url = reverse("auth-user-update-password", kwargs={"pk": self.basicuser1.public_id})
-    #     response = self.client.patch(url, {"password": "newpassword"})
+        login_url = reverse("auth-login-list")
+        login_data = {"email": self.basicuser1.email, "password": "Newpassword1!"}
+        login_response = self.client.post(login_url, login_data)
 
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     self.assertEqual(response.data["detail"], "Password updated successfully.")
+        self.assertEqual(login_response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", login_response.data)
+        self.assertIn("refresh", login_response.data)
+        self.assertIn("user", login_response.data)
+
+    def test_update_user_password_using_own_account_without_uppercase_number_and_special_char(
+        self,
+    ):
+        """Test updating user password using superuser account without uppercase, number, and special char."""
+        self.client.force_authenticate(user=self.basicuser1)
+        url = reverse(
+            "auth-user-update-password", kwargs={"pk": self.basicuser1.public_id}
+        )
+        response = self.client.patch(url, {"password": "newpassword"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["password"][0],
+            "Password must contain at least one uppercase letter.",
+        )
+
+    def test_update_user_password_using_own_account_without_number_and_special_char(
+        self,
+    ):
+        """Test updating user password using superuser account without number and special char."""
+        self.client.force_authenticate(user=self.basicuser1)
+        url = reverse(
+            "auth-user-update-password", kwargs={"pk": self.basicuser1.public_id}
+        )
+        response = self.client.patch(url, {"password": "Newpassword"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["password"][0], "Password must contain at least one digit."
+        )
+
+    def test_update_user_password_using_own_account_without_special_char(self):
+        """Test updating user password using superuser account without special char."""
+        self.client.force_authenticate(user=self.basicuser1)
+        url = reverse(
+            "auth-user-update-password", kwargs={"pk": self.basicuser1.public_id}
+        )
+        response = self.client.patch(url, {"password": "Newpassword1"})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["password"][0],
+            "Password must contain at least one special character (!@#$%^&_*()).",
+        )
+
+    def test_update_user_password_using_own_account_empty_password(self):
+        """Test updating user password using superuser account empty password."""
+        self.client.force_authenticate(user=self.basicuser1)
+        url = reverse(
+            "auth-user-update-password", kwargs={"pk": self.basicuser1.public_id}
+        )
+        response = self.client.patch(url, {"password": ""})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["password"][0], "This field may not be blank.")
+
+    def test_update_user_password_using_own_account_then_login(self):
+        """Test updating user password using superuser account."""
+        self.client.force_authenticate(user=self.basicuser1)
+        url = reverse(
+            "auth-user-update-password", kwargs={"pk": self.basicuser1.public_id}
+        )
+        response = self.client.patch(url, {"password": "Newpassword1!"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["detail"], "Password updated successfully.")
+
+        login_url = reverse("auth-login-list")
+        login_data = {"email": self.basicuser1.email, "password": "Newpassword1!"}
+        login_response = self.client.post(login_url, login_data)
+
+        self.assertEqual(login_response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", login_response.data)
+        self.assertIn("refresh", login_response.data)
+        self.assertIn("user", login_response.data)
+
+    def test_update_other_user_password_using_basic_account(self):
+        """Test updating other user password using basic user account."""
+        self.client.force_authenticate(user=self.basicuser1)
+        url = reverse(
+            "auth-user-update-password", kwargs={"pk": self.basicuser2.public_id}
+        )
+        response = self.client.patch(url, {"password": "Newpassword1!"})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_superuser_password_using_basic_account(self):
+        """Test updating superuser password using basic user account."""
+        self.client.force_authenticate(user=self.basicuser1)
+        url = reverse(
+            "auth-user-update-password", kwargs={"pk": self.superuser.public_id}
+        )
+        response = self.client.patch(url, {"password": "Newpassword1!"})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
