@@ -36,7 +36,6 @@ class UserManager(BaseUserManager, AbstractManager):
 
         user = self.create_user(username, email, password, **kwargs)
         user.is_superuser = True
-        user.is_staff = True
         user.save(using=self._db)
         return user
 
@@ -47,7 +46,6 @@ class User(AbstractModel, AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(db_index=True, unique=True)
     is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
 
     # This will be required when creating an account
     USERNAME_FIELD = "email"
@@ -60,4 +58,10 @@ class User(AbstractModel, AbstractBaseUser, PermissionsMixin):
 
     @property
     def fullname(self):
+        """Return the full name of the user."""
         return f"{self.first_name} {self.last_name}"
+
+    @property
+    def user_repositories(self):
+        """Return all repositories created by the user."""
+        return self.user_repository.all()

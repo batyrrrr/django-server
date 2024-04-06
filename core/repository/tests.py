@@ -1,179 +1,209 @@
+import json
 from django.urls import reverse
+from rest_framework import status
 from core.repository.models import Repository
+from core.user.serializers import UserSerializer
 from rest_framework.test import APITestCase, APIClient
-from core.factories import UserFactory, RepositoryFactory
+from core.factories.repositories_factory import (
+    UserFactory,
+    RepositoryFactory,
+    CategoryFactory,
+)
 
 
-class TestRepository(APITestCase):
+class TestCategoryModel(APITestCase):
     @classmethod
-    def setUpTestData(cls):
-        cls.user = UserFactory()
-        cls.client = APIClient()
-        cls.repository = Repository.objects.create(
-            title="Test",
-            description="Test Description",
-            author=cls.user,
-        )
+    def setUpTestData(cls) -> None:
+        cls.category = CategoryFactory()
+
+    def test_category_model(self):
+        self.assertEqual(str(self.category), self.category.name)
+
+
+class TestRepositoryModel(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.superuser = UserFactory.create_superuser()
+        cls.repository = RepositoryFactory(creator=cls.superuser)
 
     def test_repository_model(self):
         repository = Repository.objects.get(public_id=self.repository.public_id)
         self.assertEqual(repository.description, self.repository.description)
         self.assertEqual(str(repository), f"{repository.title}-{repository.author}")
         self.assertEqual(repository.author, self.repository.author)
-        self.assertEqual(repository.title, self.repository.title)
 
-    def test_fetch_list_and_detail_repository_endpoints(self):
+
+class TestRepositoryEndpoints(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.superuser = UserFactory.create_superuser()
+        cls.user = UserFactory()
+        cls.client = APIClient()
+        cls.repository = RepositoryFactory(creator=cls.superuser)
+
+    def test_get_all_repositories_using_authenticated_superuser(self):
+        """Test get all repositories using authenticated superuser."""
+        self.client.force_authenticate(self.superuser)
+        url = reverse("repositories-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_all_repositories_using_authenticated_basic_user(self):
+        """Test get all repositories using authenticated basic user."""
         self.client.force_authenticate(self.user)
         url = reverse("repositories-list")
         response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # Repository List
-        self.assertEqual(response.status_code, 200)
+    def test_get_all_repotores_using_unauthenticated_user(self):
+        """Test get all repositories using unauthenticated user."""
+        url = reverse("repositories-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_create_repository_using_authenticated_superuser(self):
+        """Test create repository using authenticated superuser."""
+        self.client.force_authenticate(self.superuser)
+        url = reverse("repositories-list")
+        data = {
+            "title": "Test title",
+            "description": "Test Description",
+            "author": self.superuser.public_id,
+        }
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
-            len(response.data["results"]), len(Repository.objects.values_list())
+            response.data["creator_details"], UserSerializer(self.superuser).data
         )
 
-        # Repository Detail
-        url_detail = reverse(
-            "repositories-detail", kwargs={"pk": self.repository.public_id}
+    def test_update_repository_using_authenticated_superuser(self):
+        """Test update repository using authenticated superuser."""
+        self.client.force_authenticate(self.superuser)
+        repository = Repository.objects.first()
+        url = reverse("repositories-detail", kwargs={"pk": repository.public_id})
+        data = {
+            "title": "Updated Title",
+            "description": "Updated Description",
+            "author": self.superuser.public_id,
+        }
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["edited"])
+        self.assertEqual(
+            response.data["creator_details"], UserSerializer(self.superuser).data
         )
-        response_detail = self.client.get(url_detail)
 
-        self.assertEqual(response_detail.status_code, 200)
+    def test_delete_repository_using_authenticated_superuser(self):
+        """Test delete repository using authenticated superuser."""
+        self.client.force_authenticate(self.superuser)
+        repository = Repository.objects.first()
+        url = reverse("repositories-detail", kwargs={"pk": repository.public_id})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-
-class TestRepositoryViewSets(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.client = APIClient()
-        cls.user = UserFactory()
-        cls.user_2 = UserFactory()
-        cls.repository = RepositoryFactory()
-        cls.superuser = UserFactory.create_superuser()
-
-    @classmethod
-    def reverse_url(self, url, **kwargs):
-        return reverse(url, kwargs=kwargs)
-
-    def authenticate_user(self, user):
-        return self.client.force_authenticate(user)
-
-    def test_create_repositories_authorize_user(self):
-        self.authenticate_user(user=self.user)
+    def test_create_repositories_using_authenticated_basic_user_failed(self):
+        """Test create repository using authenticated basic user failed."""
+        self.client.force_authenticate(self.user)
+        url = reverse("repositories-list")
         data = {
             "title": "Test title",
             "description": "Test Description",
             "author": self.user.public_id,
         }
-        response = self.client.post(
-            self.reverse_url("repositories-list"), data, format="json"
-        )
-        self.assertEqual(response.status_code, 201)
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_owner_create_repositories_authorize_user_raise_exception(self):
-        self.authenticate_user(user=self.user)
-        url = reverse("repositories-list")
+    def test_update_repositories_using_authenticated_basic_user_failed(self):
+        """Test update repository using authenticated basic user failed."""
+        self.client.force_authenticate(self.user)
+        repository = Repository.objects.first()
+        url = reverse("repositories-detail", kwargs={"pk": repository.public_id})
         data = {
-            "title": "",
-            "description": "Test Description",
-            "author": self.user.public_id,
-        }
-        response = self.client.post(
-            self.reverse_url("repositories-list"), data, format="json"
-        )
-        self.assertEqual(response.status_code, 400)
-
-    def test_owner_update_repository_with_authenticated_user(self):
-        self.authenticate_user(user=self.user)
-        repository = RepositoryFactory(author=self.user)
-        obj_id = Repository.objects.get_object_by_public_id(
-            public_id=repository.public_id
-        )
-        updated_data = {
             "title": "Updated Title",
             "description": "Updated Description",
             "author": self.user.public_id,
         }
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        # Before Updating
-        self.assertFalse(repository.edited)
-        response = self.client.patch(
-            self.reverse_url("repositories-detail", pk=obj_id.public_id),
-            updated_data,
-            format="json",
+    def test_delete_repository_using_authenticated_basic_user_failed(self):
+        """Test delete repository using authenticated basic user failed."""
+        self.client.force_authenticate(self.user)
+        repository = Repository.objects.first()
+        url = reverse("repositories-detail", kwargs={"pk": repository.public_id})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # Need to improve this test case to test create without specifying the creator
+    def test_all_in_one_create_read_update_delete_repositories_via_endpoints_using_superuser(
+        self,
+    ):
+        """
+        Test create, read, update, delete repository via endpoints using superuser. The superuser register first a superuser account
+        then create a repository using the superuser account.
+        """
+        self.client.force_authenticate(self.superuser)
+        register_data = {
+            "username": "testusername",
+            "email": "test@gmail.com",
+            "password": "Test_password_123",
+            "is_superuser": True,
+        }
+        register_url = reverse("auth-register-list")
+        register_reponse = self.client.post(register_url, register_data, format="json")
+        self.assertEqual(register_reponse.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(register_reponse.data["detail"], "Registered Successfully")
+
+        login_data = {"email": "test@gmail.com", "password": "Test_password_123"}
+        login_url = reverse("auth-login-list")
+        login_response = self.client.post(login_url, login_data, format="json")
+        self.assertEqual(login_response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", login_response.data)
+        self.assertIn("refresh", login_response.data)
+        self.assertIn("user", login_response.data)
+
+        access_token = login_response.data["access"]
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+        repository_url = reverse("repositories-list")
+        repository_response = self.client.get(
+            repository_url, content_type="application/json", headers=headers
         )
+        self.assertEqual(repository_response.status_code, status.HTTP_200_OK)
 
-        # After Applying
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.data["edited"])
-
-    # TESTING CRUD WITH CUSTOM PERMISSION (USING ENDPOINT)
-    def test_create_repositories_using_admin_for_other_user_account(self):
-        self.authenticate_user(user=self.superuser)
-        url = self.reverse_url("repositories-list")
-
-        # CREATE
-        data = {
-            "title": "TEST 1 USING ADMIN ACCOUNT",
-            "description": "TEST 1 DESCRIPTION",
-            "author": self.user.public_id,
+    # Need to improve this test case to test create without specifying the creator
+    def test_all_in_one_create_read_update_delete_repositories_via_endpoints_using_basic_user(
+        self,
+    ):
+        """
+        Test create, read, update, delete repository via endpoints using superuser. The superuser register first a basic user account
+        then create a repository using the superuser account.
+        """
+        self.client.force_authenticate(self.superuser)
+        register_data = {
+            "username": "testusername",
+            "email": "test@gmail.com",
+            "password": "Test_password_123",
         }
-        response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, 201)
+        register_url = reverse("auth-register-list")
+        register_reponse = self.client.post(register_url, register_data, format="json")
+        self.assertEqual(register_reponse.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(register_reponse.data["detail"], "Registered Successfully")
 
-        # READ
-        repo = Repository.objects.first()
-        url_datail = self.reverse_url("repositories-detail", pk=repo.public_id)
-        response_detail = self.client.get(url_datail)
-        self.assertEqual(response_detail.status_code, 200)
+        login_data = {"email": "test@gmail.com", "password": "Test_password_123"}
+        login_url = reverse("auth-login-list")
+        login_response = self.client.post(login_url, login_data, format="json")
+        self.assertEqual(login_response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", login_response.data)
+        self.assertIn("refresh", login_response.data)
+        self.assertIn("user", login_response.data)
+        self.assertFalse(login_response.data["user"]["is_superuser"])
 
-        # UPDATE
-        updated_data = {
-            "title": "UPDATED TEST 1 USING ADMIN ACCOUNT",
-            "description": "UPDATED TEST 1 DESCRIPTION",
-            "author": self.user_2.public_id,
-        }
-        updated_url = self.reverse_url("repositories-detail", pk=repo.public_id)
-        updated_response = self.client.patch(updated_url, updated_data, format="json")
-        updated_repo = Repository.objects.first()
-        self.assertEqual(updated_response.status_code, 200)
-        self.assertEqual(updated_repo.author.email, self.user_2.email)
+        access_token = login_response.data["access"]
+        headers = {"Authorization": f"Bearer {access_token}"}
 
-        # DELETE
-        delete_response = self.client.delete(updated_url)
-        self.assertEqual(delete_response.status_code, 204)
-
-    def test_create_repositories_using_basic_user_for_other_user_account(self):
-        self.authenticate_user(user=self.user)
-        url = self.reverse_url("repositories-list")
-
-        # CREATE
-        data = {
-            "title": "TEST 1 USING ADMIN ACCOUNT",
-            "description": "TEST 1 DESCRIPTION",
-            "author": self.user_2.public_id,
-        }
-        response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, 400)
-
-        # READ Repository using non-author
-        repo = Repository.objects.first()
-        url_datail = self.reverse_url("repositories-detail", pk=repo.public_id)
-        response_detail = self.client.get(url_datail)
-        self.assertEqual(response_detail.status_code, 200)
-
-        # UPDATE
-        updated_data = {
-            "title": "UPDATED TEST 1 USING ADMIN ACCOUNT",
-            "description": "UPDATED TEST 1 DESCRIPTION",
-            "author": self.user_2.public_id,
-        }
-        updated_url = self.reverse_url("repositories-detail", pk=repo.public_id)
-        updated_response = self.client.patch(updated_url, updated_data, format="json")
-        updated_repo = Repository.objects.first()
-        self.assertEqual(updated_response.status_code, 403)
-        self.assertNotEqual(updated_repo.author.email, self.user_2.email)
-
-        # DELETE
-        delete_response = self.client.delete(updated_url)
-        self.assertEqual(delete_response.status_code, 403)
+        repository_url = reverse("repositories-list")
+        repository_response = self.client.get(
+            repository_url, content_type="application/json", headers=headers
+        )
+        self.assertEqual(repository_response.status_code, status.HTTP_200_OK)

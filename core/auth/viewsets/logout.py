@@ -13,11 +13,12 @@ class LogoutViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        """Generated token will automatically be available in blacklisted."""
         try:
             refresh = request.data.get("refresh_token")
             token = RefreshToken(refresh)
             token.blacklist()
-            return Response("Logout Successfully!", status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "Logout Successfully!"}, status=status.HTTP_200_OK
+            )
         except TokenError as error:
-            return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError({"detail": "The refresh token is invalid!"})
