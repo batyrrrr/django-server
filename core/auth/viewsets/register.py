@@ -1,13 +1,13 @@
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
-from core.auth.permissions import IsSuperuser
+from rest_framework.permissions import AllowAny
 from core.auth.serializers.register import RegisterSerializer
 
 
 class RegisterViewSet(viewsets.ViewSet):
     http_method_names = ["post"]
-    permission_classes = [IsSuperuser]
+    permission_classes = [AllowAny]
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
