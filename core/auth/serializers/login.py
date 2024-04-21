@@ -7,6 +7,10 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         """Validating the request data before obtaining the refresh and access token from the inherited class."""
+
+        # Convert email to lowercase
+        attrs["email"] = attrs["email"].lower()
+
         data = super().validate(attrs)
         refresh = self.get_token(self.user)
         data["user"] = UserSerializer(self.user).data
