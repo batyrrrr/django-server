@@ -27,7 +27,7 @@ Clone the project
 Go to the project directory
 
 ```bash
-  cd Recipe_API
+  cd <Project_Name>
 ```
 
 Install and create a separate working environment
