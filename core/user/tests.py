@@ -30,6 +30,7 @@ class TestUserModelAndManager(APITestCase):
         self.assertEqual(user.fullname, f"{user.first_name} {user.last_name}")
         self.assertEqual(user.username, self.basic_user.username)
         self.assertEqual(user.email, self.basic_user.email)
+        self.assertEqual(user.is_staff, False)
         self.assertEqual(str(user), self.basic_user.email)
 
     def test_basic_user_creation_with_invalid_data(self):
@@ -254,6 +255,10 @@ class TestUserViewSetEndpoint(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["detail"], "Password updated successfully.")
 
+        logout_url = reverse("auth-logout-list")
+        logout_response = self.client.post(logout_url)
+        self.assertEqual(logout_response.status_code, status.HTTP_200_OK)
+
         login_url = reverse("auth-login-list")
         login_data = {"email": self.basicuser1.email, "password": "Newpassword1!"}
         login_response = self.client.post(login_url, login_data)
@@ -329,6 +334,10 @@ class TestUserViewSetEndpoint(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["detail"], "Password updated successfully.")
+
+        logout_url = reverse("auth-logout-list")
+        logout_response = self.client.post(logout_url)
+        self.assertEqual(logout_response.status_code, status.HTTP_200_OK)
 
         login_url = reverse("auth-login-list")
         login_data = {"email": self.basicuser1.email, "password": "Newpassword1!"}

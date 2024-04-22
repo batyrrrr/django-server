@@ -1,6 +1,7 @@
 import json
 from django.urls import reverse
 from rest_framework import status
+from core.user.models import User
 from core.repository.models import Repository
 from core.user.serializers import UserSerializer
 from rest_framework.test import APITestCase, APIClient
@@ -154,6 +155,13 @@ class TestRepositoryEndpoints(APITestCase):
         self.assertEqual(register_reponse.status_code, status.HTTP_201_CREATED)
         self.assertEqual(register_reponse.data["detail"], "Registered Successfully")
 
+        # Set is_active to True
+        user = User.objects.get(email=register_data.get("email"))
+        user_detail_url = reverse("auth-user-detail", kwargs={"pk": user.public_id})
+        user_data = {"is_active": True}
+        user_reponse = self.client.patch(user_detail_url, user_data, format="json")
+        self.assertEqual(user_reponse.status_code, status.HTTP_200_OK)
+
         login_data = {"email": "test@gmail.com", "password": "Test_password_123"}
         login_url = reverse("auth-login-list")
         login_response = self.client.post(login_url, login_data, format="json")
@@ -189,6 +197,16 @@ class TestRepositoryEndpoints(APITestCase):
         register_reponse = self.client.post(register_url, register_data, format="json")
         self.assertEqual(register_reponse.status_code, status.HTTP_201_CREATED)
         self.assertEqual(register_reponse.data["detail"], "Registered Successfully")
+
+        # Set is_active to True
+        self.client.force_authenticate(self.superuser)
+        user = User.objects.get(email=register_data.get("email"))
+        user_detail_url = reverse("auth-user-detail", kwargs={"pk": user.public_id})
+        user_data = {"is_active": True}
+        user_reponse = self.client.patch(user_detail_url, user_data, format="json")
+        self.assertEqual(user_reponse.status_code, status.HTTP_200_OK)
+        logout_url = reverse("auth-logout-list")
+        self.client.post(logout_url, format="json")
 
         login_data = {"email": "test@gmail.com", "password": "Test_password_123"}
         login_url = reverse("auth-login-list")

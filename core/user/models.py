@@ -65,3 +65,8 @@ class User(AbstractModel, AbstractBaseUser, PermissionsMixin):
     def user_repositories(self):
         """Return all repositories created by the user."""
         return self.user_repository.all()
+
+    @property
+    def is_staff(self):
+        """Return True if the user is a staff member."""
+        return self.is_superuser
