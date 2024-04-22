@@ -18,4 +18,6 @@ class RegisterViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response("Registered Successfully", status=status.HTTP_201_CREATED)
+            return Response(
+                {"detail": "Registered Successfully"}, status=status.HTTP_201_CREATED
+            )

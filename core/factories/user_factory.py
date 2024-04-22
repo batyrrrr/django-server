@@ -12,4 +12,4 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     @classmethod
     def create_superuser(cls, **kwargs):
-        return cls(is_staff=True, is_superuser=True, **kwargs)
+        return cls(is_superuser=True, **kwargs)
