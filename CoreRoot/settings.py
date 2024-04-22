@@ -98,7 +98,7 @@ STORAGES = {
     },
 }
 
-WSGI_APPLICATION = "CoreRoot.wsgi.application"
+WSGI_APPLICATION = "CoreRoot.wsgi.app"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
